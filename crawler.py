@@ -66,7 +66,7 @@ def crawler_data(cid, dt, url, headers):
 
                 res_list.append(u"%s" % strings)
     write_csv(company, res_list)
-    sleep_time = random.randint(1, 5)
+    sleep_time = random.randint(0, 120)
     time.sleep(sleep_time)
 
 
