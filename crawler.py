@@ -27,6 +27,9 @@ def crawler_data(cid, dt, url, headers):
             ##抓取水位
             data_fid = tr_list[i].attrs['data-fid']
             asian = get_asian(cid, data_fid, headers)
+            ##增加sleep时间
+            sleep_time = random.randint(0, 60)
+            time.sleep(sleep_time)
             europe = get_europe(cid, data_fid, headers)
             ###处理信息
             row = tr_list[i].contents
