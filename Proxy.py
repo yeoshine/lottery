@@ -205,17 +205,20 @@ class GetIpThread(threading.Thread):
 
     def run(self):
         global ips
-        while True:
+        a = []
+        for i in range(0, 200):
             # 获取IP列表
             res = requests.get(apiUrl).content.decode()
             # 按照\n分割获取到的IP
             ips = res.split('\n')
+            a.append(ips[0])
+            x = 3
             # 利用每一个IP
-            for proxyip in ips:
-                # 开启一个线程
-                CrawlThread(proxyip).start()
-            # 休眠
-            time.sleep(self.fetchSecond)
+            # for proxyip in ips:
+            #     # 开启一个线程
+            #     CrawlThread(proxyip).start()
+            # # 休眠
+            # time.sleep(self.fetchSecond)
 
 
 if __name__ == '__main__':
