@@ -54,9 +54,8 @@ class CrawlerLottery:
                 tr_list = soup.find_all("tr")
                 res_list = []
                 for i in range(len(tr_list)):
-                    ##从第7行开始
+                    ##from line 7
                     if i > 6 and i % 2 == 1:
-                        ###处理信息
                         row = tr_list[i].contents
                         riqi = dt
                         saishi = row[3].text
@@ -66,7 +65,6 @@ class CrawlerLottery:
                         kedui = row[13].text
                         bifen = row[11].text
 
-                        ##抓取水位
                         data_fid = tr_list[i].attrs['data-fid']
                         asian = self.get_asian(cid, data_fid, headers, proxy)
                         europe = self.get_europe(cid, data_fid, headers, proxy)
@@ -103,11 +101,9 @@ class CrawlerLottery:
             return True
         except Exception as e:
             print("crawler_data is error:" + str(e))
-            ##换代理
             self.proxy = self.get_proxy()
             return None
 
-    ##获取亚盘
     def get_asian(self, cid, data_fid, headers, proxy):
         now = time.time()
         now_int = int(now)
@@ -136,7 +132,6 @@ class CrawlerLottery:
                 return dic
         return None
 
-    ##获取欧盘
     def get_europe(self, cid, data_fid, headers, proxy):
         now = time.time()
         now_int = int(now)
@@ -180,7 +175,6 @@ class CrawlerLottery:
                 csvfile.write(u"\n")
 
     def get_date_list(self, beginDate, endDate):
-        # beginDate, endDate是形如‘20160601’的字符串或datetime格式
         date_list = [datetime.strftime(x, '%Y-%m-%d') for x in list(pd.date_range(start=beginDate, end=endDate))]
         return date_list
 
@@ -207,7 +201,6 @@ class CrawlerLottery:
         order = "74980f18b66cb3f3c92561b3a085ac63"
         apiUrl = "http://api.ip.data5u.com/dynamic/get.html?order=" + order
         res = requests.get(apiUrl).content.decode()
-        # 按照\n分割获取到的IP
         ips = res.split('\n')
         print("check-proxy:" + ips[0])
         proxy = {"http": ips[0]}
