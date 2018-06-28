@@ -18,6 +18,7 @@ def retry_if_result_none(result):
 
 class CrawlerLottery:
     proxy = ""
+    weilian_cid = "293"
 
     def __init__(self, startDate, endDate, cid, headers):
         self.create_csv(company)
@@ -66,17 +67,26 @@ class CrawlerLottery:
                         bifen = row[11].text
 
                         data_fid = tr_list[i].attrs['data-fid']
-                        asian = self.get_asian(cid, data_fid, headers, proxy)
+
+                        yachupan_up = " "
+                        yachupan_rang = " "
+                        yachupan_down = " "
+                        yazhongpan_up = " "
+                        yazhongpan_rang = " "
+                        yazhongpan_down = " "
+
+                        if cid != self.weilian_cid:
+                            asian = self.get_asian(cid, data_fid, headers, proxy)
+                            if asian is not None:
+                                yachupan_up = asian["yachupan_up"]
+                                yachupan_rang = asian["yachupan_rang"]
+                                yachupan_down = asian["yachupan_down"]
+                                yazhongpan_up = asian["yazhongpan_up"]
+                                yazhongpan_rang = asian["yazhongpan_rang"]
+                                yazhongpan_down = asian["yazhongpan_down"]
+
                         europe = self.get_europe(cid, data_fid, headers, proxy)
-
-                        if asian and europe is not None:
-                            yachupan_up = asian["yachupan_up"]
-                            yachupan_rang = asian["yachupan_rang"]
-                            yachupan_down = asian["yachupan_down"]
-                            yazhongpan_up = asian["yazhongpan_up"]
-                            yazhongpan_rang = asian["yazhongpan_rang"]
-                            yazhongpan_down = asian["yazhongpan_down"]
-
+                        if europe is not None:
                             ouchupan_win = europe["ouchupan_win"]
                             ouchupan_draw = europe["ouchupan_draw"]
                             ouchupan_loss = europe["ouchupan_loss"]
@@ -230,14 +240,14 @@ if __name__ == '__main__':
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'
         }
 
-        company = "aomen"
+        company = "weilian"
         company_list = {
             "aomen": "5",
             "libo": "2",
             "weilian": "293"
         }
         cid = company_list[company]
-        CrawlerLottery("20160101", "20180628", cid, headers)
+        CrawlerLottery("20180315", "20180628", cid, headers)
         print("end-time:" + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
     except Exception as e:
         print("exception-time:" + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
