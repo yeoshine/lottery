@@ -10,26 +10,39 @@ import json
 import io
 import random
 from retrying import retry
+import threading
 
 
 def retry_if_result_none(result):
     return result is None
 
 
-class CrawlerLottery:
+def get_date_list(beginDate, endDate):
+    date_list = [datetime.strftime(x, '%Y-%m-%d') for x in list(pd.date_range(start=beginDate, end=endDate))]
+    return date_list
+
+
+def create_csv(company):
+    file = company + ".csv"
+    headers = u"riqi,saishi,lunci,bisaishijian,zhudui,kedui,bifen,yachupan_up,yachupan_rang,yachupan_down,yazhongpan_up,yazhongpan_rang," \
+              u"yazhongpan_down,ouchupan_win,ouchupan_draw,ouchupan_loss,ouzhongpan_win,ouzhongpan_draw,ouzhongpan_loss"
+    with io.open(file, mode="a", encoding='utf-8') as csvfile:
+        csvfile.write(headers)
+        csvfile.write(u'\n')
+
+
+class CrawlerLottery(threading.Thread):
     proxy = ""
     weilian_cid = "293"
 
-    def __init__(self, startDate, endDate, cid, headers):
-        self.create_csv(company)
-        self.handle(startDate, endDate, cid, headers)
+    def __init__(self, date, cid, headers):
+        super(CrawlerLottery, self).__init__()
+        self.handle(date, cid, headers)
 
-    def handle(self, start, end, cid, headers):
-        date_list = self.get_date_list(start, end)
-        for d in date_list:
-            self.proxy = ""
-            url = "http://odds.500.com/index_history_" + str(d) + ".shtml#!"
-            self.crawler_data(cid, d, url, headers, self.proxy)
+    def handle(self, date, cid, headers):
+        self.proxy = ""
+        url = "http://odds.500.com/index_history_" + str(date) + ".shtml#!"
+        self.crawler_data(cid, date, url, headers, self.proxy)
 
     def lottery_request(self, url, headers, proxy):
         try:
@@ -170,23 +183,11 @@ class CrawlerLottery:
                 return dic
         return None
 
-    def create_csv(self, company):
-        file = company + ".csv"
-        headers = u"riqi,saishi,lunci,bisaishijian,zhudui,kedui,bifen,yachupan_up,yachupan_rang,yachupan_down,yazhongpan_up,yazhongpan_rang," \
-                  u"yazhongpan_down,ouchupan_win,ouchupan_draw,ouchupan_loss,ouzhongpan_win,ouzhongpan_draw,ouzhongpan_loss"
-        with io.open(file, mode="a", encoding='utf-8') as csvfile:
-            csvfile.write(headers)
-            csvfile.write(u'\n')
-
     def write_csv(self, company, res_list):
         with io.open(company + ".csv", mode="a", encoding='utf-8') as csvfile:
             for line in res_list:
                 csvfile.write(u"%s" % line)
                 csvfile.write(u"\n")
-
-    def get_date_list(self, beginDate, endDate):
-        date_list = [datetime.strftime(x, '%Y-%m-%d') for x in list(pd.date_range(start=beginDate, end=endDate))]
-        return date_list
 
     def get_ip_list(self, url, headers):
         web_data = requests.get(url, headers=headers)
@@ -247,7 +248,12 @@ if __name__ == '__main__':
             "weilian": "293"
         }
         cid = company_list[company]
-        CrawlerLottery("20180315", "20180628", cid, headers)
+
+        start = "20110101"
+        end = "20180628"
+        date_list = get_date_list(start, end)
+        for d in date_list:
+            CrawlerLottery(d, cid, headers)
         print("end-time:" + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
     except Exception as e:
         print("exception-time:" + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
