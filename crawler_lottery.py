@@ -26,7 +26,7 @@ class CrawlerLottery:
     def handle(self, start, end, cid, headers):
         date_list = self.get_date_list(start, end)
         for d in date_list:
-            self.proxy = self.get_proxy()
+            self.proxy = ""
             url = "http://odds.500.com/index_history_" + str(d) + ".shtml#!"
             self.crawler_data(cid, d, url, headers, self.proxy)
 
@@ -101,7 +101,7 @@ class CrawlerLottery:
             return True
         except Exception as e:
             print("crawler_data is error:" + str(e))
-            self.proxy = self.get_proxy()
+            # self.proxy = self.get_proxy()
             return None
 
     def get_asian(self, cid, data_fid, headers, proxy):
