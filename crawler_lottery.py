@@ -30,22 +30,29 @@ def create_csv(company):
         csvfile.write(headers)
         csvfile.write(u'\n')
 
+
+##main class
 class CrawlerLottery(threading.Thread):
     proxy = ""
     weilian_cid = "293"
+    company = ""
 
-    def __init__(self, date, cid, headers):
+    def __init__(self, date, cid, company):
         super(CrawlerLottery, self).__init__()
-        self.handle(date, cid, headers)
+        self.company = company
+        self.handle(date, cid)
 
-    def handle(self, date, cid, headers):
+    def handle(self, date, cid):
         self.proxy = ""
         url = "http://odds.500.com/index_history_" + str(date) + ".shtml#!"
-        self.crawler_data(cid, date, url, headers, self.proxy)
+        self.crawler_data(cid, date, url, self.proxy)
 
-    def lottery_request(self, url, headers, proxy):
+    def lottery_request(self, url, proxy):
         try:
             print(url)
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'
+            }
             response = requests.get(url, headers=headers, timeout=5, proxies=proxy)
             if response is not None:
                 return response
@@ -58,10 +65,9 @@ class CrawlerLottery(threading.Thread):
         time.sleep(sleep_time)
 
     @retry(retry_on_result=retry_if_result_none)
-    def crawler_data(self, cid, dt, url, headers, proxy):
+    def crawler_data(self, cid, dt, url, proxy):
         try:
-            print(url)
-            html = self.lottery_request(url, headers, proxy)
+            html = self.lottery_request(url, proxy)
             if html is not None:
                 soup = BeautifulSoup(html.content, 'html.parser', from_encoding='gb18030')
                 tr_list = soup.find_all("tr")
@@ -94,7 +100,7 @@ class CrawlerLottery(threading.Thread):
                         ouzhongpan_loss = " "
 
                         if cid != self.weilian_cid:
-                            asian = self.get_asian(cid, data_fid, headers, proxy)
+                            asian = self.get_asian(cid, data_fid, proxy)
                             if asian is not None:
                                 yachupan_up = asian["yachupan_up"]
                                 yachupan_rang = asian["yachupan_rang"]
@@ -103,7 +109,7 @@ class CrawlerLottery(threading.Thread):
                                 yazhongpan_rang = asian["yazhongpan_rang"]
                                 yazhongpan_down = asian["yazhongpan_down"]
 
-                        europe = self.get_europe(cid, data_fid, headers, proxy)
+                        europe = self.get_europe(cid, data_fid, proxy)
                         if europe is not None:
                             ouchupan_win = europe["ouchupan_win"]
                             ouchupan_draw = europe["ouchupan_draw"]
@@ -125,19 +131,19 @@ class CrawlerLottery(threading.Thread):
                             ouzhongpan_draw) + ',' + str(ouzhongpan_loss)
 
                         res_list.append(u"%s" % strings)
-                self.write_csv(company, res_list)
+                self.write_csv(self.company, res_list)
             return True
         except Exception as e:
             print("crawler_data is error:" + str(e))
             # self.proxy = self.get_proxy()
             return None
 
-    def get_asian(self, cid, data_fid, headers, proxy):
+    def get_asian(self, cid, data_fid, proxy):
         now = time.time()
         now_int = int(now)
         water_url = "http://odds.500.com/json/odds.php?_=" + str(
             now_int) + "&fid=" + data_fid + "&cid=" + cid + "&type=asian&r=1"
-        water = self.lottery_request(water_url, headers, proxy)
+        water = self.lottery_request(water_url, proxy)
         if water is not None:
             if len(water.text) > 2:
                 water_list = json.loads(water.text)
@@ -160,12 +166,12 @@ class CrawlerLottery(threading.Thread):
                 return dic
         return None
 
-    def get_europe(self, cid, data_fid, headers, proxy):
+    def get_europe(self, cid, data_fid, proxy):
         now = time.time()
         now_int = int(now)
         water_url = "http://odds.500.com/json/odds.php?_=" + str(
             now_int) + "&fid=" + data_fid + "&cid=" + cid + "&type=europe&r=1"
-        water = self.lottery_request(water_url, headers, proxy)
+        water = self.lottery_request(water_url, proxy)
         if water is not None:
             if len(water.text) > 2:
                 water_list = json.loads(water.text)
@@ -226,41 +232,11 @@ class CrawlerLottery(threading.Thread):
             return proxy
 
     def check_proxy(self, proxy):
-        url = "http://odds.500.com/index_history_2016-01-01.shtml#!"
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'
-        }
         try:
-            html = self.lottery_request(url, headers, proxy)
+            testUrl = "http://odds.500.com/index_history_2016-01-01.shtml#!"
+            html = self.lottery_request(testUrl, proxy)
             if html is not None:
                 return True
             return False
         except:
             return False
-
-
-if __name__ == '__main__':
-    try:
-        print("start-time:" + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'
-        }
-
-        company = "weilian"
-        company_list = {
-            "aomen": "5",
-            "libo": "2",
-            "weilian": "293"
-        }
-        cid = company_list[company]
-
-        start = "20110101"
-        end = "20180628"
-        date_list = get_date_list(start, end)
-        for d in date_list:
-            CrawlerLottery(d, cid, headers)
-        print("end-time:" + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
-    except Exception as e:
-        print("exception-time:" + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
-        print(e)
-        pass
