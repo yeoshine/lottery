@@ -30,7 +30,6 @@ def create_csv(company):
         csvfile.write(headers)
         csvfile.write(u'\n')
 
-
 class CrawlerLottery(threading.Thread):
     proxy = ""
     weilian_cid = "293"
@@ -87,6 +86,12 @@ class CrawlerLottery(threading.Thread):
                         yazhongpan_up = " "
                         yazhongpan_rang = " "
                         yazhongpan_down = " "
+                        ouchupan_win = " "
+                        ouchupan_draw = " "
+                        ouchupan_loss = " "
+                        ouzhongpan_win = " "
+                        ouzhongpan_draw = " "
+                        ouzhongpan_loss = " "
 
                         if cid != self.weilian_cid:
                             asian = self.get_asian(cid, data_fid, headers, proxy)
@@ -107,19 +112,19 @@ class CrawlerLottery(threading.Thread):
                             ouzhongpan_draw = europe["ouzhongpan_draw"]
                             ouzhongpan_loss = europe["ouzhongpan_loss"]
 
-                            strings = str(riqi) + ',' + str(saishi) + ',' + str(lunci) + ',' + str(
-                                bisaishijian) + ',' + str(
-                                zhudui) + ',' + str(kedui) \
-                                      + ',' + str(bifen) + ',' + str(yachupan_up) + ',' + str(
-                                yachupan_rang) + ',' + str(yachupan_down) \
-                                      + ',' + str(yazhongpan_up) + ',' + str(yazhongpan_rang) + ',' + str(
-                                yazhongpan_down) + ',' + str(
-                                ouchupan_win) \
-                                      + ',' + str(ouchupan_draw) + ',' + str(ouchupan_loss) + ',' + str(
-                                ouzhongpan_win) + ',' + str(
-                                ouzhongpan_draw) + ',' + str(ouzhongpan_loss)
+                        strings = str(riqi) + ',' + str(saishi) + ',' + str(lunci) + ',' + str(
+                            bisaishijian) + ',' + str(
+                            zhudui) + ',' + str(kedui) \
+                                  + ',' + str(bifen) + ',' + str(yachupan_up) + ',' + str(
+                            yachupan_rang) + ',' + str(yachupan_down) \
+                                  + ',' + str(yazhongpan_up) + ',' + str(yazhongpan_rang) + ',' + str(
+                            yazhongpan_down) + ',' + str(
+                            ouchupan_win) \
+                                  + ',' + str(ouchupan_draw) + ',' + str(ouchupan_loss) + ',' + str(
+                            ouzhongpan_win) + ',' + str(
+                            ouzhongpan_draw) + ',' + str(ouzhongpan_loss)
 
-                            res_list.append(u"%s" % strings)
+                        res_list.append(u"%s" % strings)
                 self.write_csv(company, res_list)
             return True
         except Exception as e:
